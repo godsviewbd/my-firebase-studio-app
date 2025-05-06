@@ -9,6 +9,11 @@ import {
 	type ScriptureRetrievalInput,
 	type ScriptureRetrievalOutput,
 } from "@/ai/flows/scripture-retrieval";
+import { 
+	translateText,
+	type TranslateTextInput,
+	type TranslateTextOutput,
+} from "@/ai/flows/translate-text";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -37,17 +42,18 @@ import {
 	BookOpenText,
 	Sparkles,
 	ScrollText,
-	BookHeart, 
-	HandHeart, 
-	Gem, 
-	Palette, 
+	BookHeart,
+	HandHeart,
+	Gem,
+	Palette,
 	LucideProps,
-	Wheat, 
-	MoonStar, 
-	Flower2, 
-	Hand, 
-	Star, 
+	Wheat,
+	MoonStar,
+	Flower2,
+	Hand,
+	Star,
 	Circle as CircleIcon,
+	Languages, // Icon for translation
 } from "lucide-react";
 
 const ALL_RELIGIONS = [
@@ -69,14 +75,20 @@ const formSchema = z.object({
 	}),
 	selectedReligions: z
 		.array(z.string())
-		.refine((value) => value.some(item => ALL_RELIGIONS.includes(item as Religion)), { 
+		.refine((value) => value.some(item => ALL_RELIGIONS.includes(item as Religion)), {
 			message: "You have to select at least one religion.",
 		})
-		.refine((value) => value.length > 0, { 
+		.refine((value) => value.length > 0, {
 			message: "You have to select at least one religion.",
 		}),
 });
 
+interface TranslatedTexts {
+  [key: string]: { // key will be entry.scripture + '-' + entry.chapter + '-' + entry.verses + '-quote' or '-insight'
+    text?: string;
+    isLoading: boolean;
+  }
+}
 
 export default function WisdomWellPage() {
 	const [isLoading, setIsLoading] = React.useState(false);
@@ -86,6 +98,8 @@ export default function WisdomWellPage() {
 	const [submittedQuestion, setSubmittedQuestion] = React.useState<string | null>(null);
 	const { toast } = useToast();
 	const [currentYear, setCurrentYear] = React.useState<number | null>(null);
+	const [translatedTexts, setTranslatedTexts] = React.useState<TranslatedTexts>({});
+
 
 	React.useEffect(() => {
 		setCurrentYear(new Date().getFullYear());
@@ -105,6 +119,7 @@ export default function WisdomWellPage() {
 		setError(null);
 		setScriptureData(null);
 		setSubmittedQuestion(values.question);
+		setTranslatedTexts({}); // Reset translations for new search
 
 		try {
 			const input: ScriptureRetrievalInput = {
@@ -134,17 +149,39 @@ export default function WisdomWellPage() {
 		}
 	}
 
+	const handleTranslate = async (textToTranslate: string, entryIndex: number, type: 'quote' | 'insight') => {
+		const entry = scriptureData?.scriptureEntries[entryIndex];
+		if (!entry) return;
+		
+		const key = `${entry.scripture}-${entry.chapter}-${entry.verses}-${type}`;
+		setTranslatedTexts(prev => ({ ...prev, [key]: { isLoading: true } }));
+
+		try {
+			const input: TranslateTextInput = { textToTranslate, targetLanguage: 'bn' };
+			const result = await translateText(input);
+			setTranslatedTexts(prev => ({ ...prev, [key]: { text: result.translatedText, isLoading: false } }));
+		} catch (e) {
+			const errorMessage = e instanceof Error ? e.message : "Translation failed.";
+			toast({
+				variant: "destructive",
+				title: "Translation Error",
+				description: errorMessage,
+			});
+			setTranslatedTexts(prev => ({ ...prev, [key]: { text: undefined, isLoading: false } }));
+		}
+	};
+
 	const getReligionIcon = (religion: string): React.FC<LucideProps> => {
 		const religionIcons: Record<string, React.FC<LucideProps>> = {
 			Hinduism: Palette,
 			Islam: MoonStar,
 			Christianity: BookHeart,
 			Buddhism: Flower2,
-			Judaism: Star, 
-			Jainism: Hand, 
+			Judaism: Star,
+			Jainism: Hand,
 			Sikhism: Gem,
-			Taoism: CircleIcon, 
-			Default: Wheat, 
+			Taoism: CircleIcon,
+			Default: Wheat,
 		};
 		return religionIcons[religion] || religionIcons["Default"];
 	};
@@ -254,18 +291,18 @@ export default function WisdomWellPage() {
 														>
 															<FormControl>
 																<Checkbox
-																	checked={field.value?.includes(religion)}
+																	checked={form.getValues("selectedReligions")?.includes(religion)}
 																	onCheckedChange={(checked) => {
-																		const currentValues = field.value || [];
+																		const currentValues = form.getValues("selectedReligions") || [];
+																		let newValues: string[];
 																		if (checked) {
-																			field.onChange([...currentValues, religion]);
+																			newValues = [...currentValues, religion];
 																		} else {
-																			field.onChange(
-																				currentValues.filter(
-																					(value) => value !== religion
-																				)
+																			newValues = currentValues.filter(
+																				(value) => value !== religion
 																			);
 																		}
+																		form.setValue("selectedReligions", newValues, { shouldValidate: true });
 																	}}
 																	aria-labelledby={`religion-label-${religion}`}
 																	id={`religion-checkbox-${religion}`}
@@ -280,10 +317,11 @@ export default function WisdomWellPage() {
 													);
 												})}
 											</div>
-											<FormMessage />
+											<FormMessage>{form.formState.errors.selectedReligions?.message}</FormMessage>
 										</FormItem>
 									)}
 								/>
+
 
 								<Button
 									type="submit"
@@ -345,6 +383,9 @@ export default function WisdomWellPage() {
 							const ReligionIcon = getReligionIcon(entry.religion);
 							const iconColor = getReligionIconColor(entry.religion);
 							const badgeStyle = getReligionBadgeStyle(entry.religion);
+							const quoteKey = `${entry.scripture}-${entry.chapter}-${entry.verses}-quote`;
+							const insightKey = `${entry.scripture}-${entry.chapter}-${entry.verses}-insight`;
+
 							return (
 								<Card
 									key={index}
@@ -372,22 +413,34 @@ export default function WisdomWellPage() {
 									</CardHeader>
 									<CardContent className="space-y-3 p-5">
 										<div>
-											<h3 className="font-semibold text-base mb-1.5 text-primary flex items-center">
-												<BookOpenText className="w-4 h-4 mr-2 text-accent flex-shrink-0" />
-												Quote:
-											</h3>
+											<div className="flex justify-between items-center mb-1.5">
+												<h3 className="font-semibold text-base text-primary flex items-center">
+													<BookOpenText className="w-4 h-4 mr-2 text-accent flex-shrink-0" />
+													Quote:
+												</h3>
+												<Button variant="ghost" size="sm" onClick={() => handleTranslate(entry.answer, index, 'quote')} disabled={translatedTexts[quoteKey]?.isLoading}>
+													{translatedTexts[quoteKey]?.isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : <Languages className="w-4 h-4"/>}
+													<span className="ml-1.5 text-xs">বাংলা</span>
+												</Button>
+											</div>
 											<blockquote className="text-foreground/90 leading-relaxed border-l-4 border-accent pl-3.5 py-1 italic text-[0.9rem]">
-												{entry.answer}
+												{translatedTexts[quoteKey]?.text || entry.answer}
 											</blockquote>
 										</div>
 										{entry.aiInsight && (
 											<div>
-												<h3 className="font-semibold text-base mb-1.5 text-primary flex items-center">
-													<Sparkles className="w-4 h-4 mr-2 text-accent flex-shrink-0" />
-													{`Purpose according to ${entry.scripture}:`}
-												</h3>
+												<div className="flex justify-between items-center mb-1.5">
+													<h3 className="font-semibold text-base text-primary flex items-center">
+														<Sparkles className="w-4 h-4 mr-2 text-accent flex-shrink-0" />
+														{`Purpose according to ${entry.scripture}:`}
+													</h3>
+													<Button variant="ghost" size="sm" onClick={() => handleTranslate(entry.aiInsight, index, 'insight')} disabled={translatedTexts[insightKey]?.isLoading}>
+														{translatedTexts[insightKey]?.isLoading ? <Loader2 className="h-4 w-4 animate-spin"/> : <Languages className="w-4 h-4"/>}
+														<span className="ml-1.5 text-xs">বাংলা</span>
+													</Button>
+												</div>
 												<p className="text-foreground/80 leading-relaxed text-[0.9rem]">
-													{entry.aiInsight}
+													{translatedTexts[insightKey]?.text || entry.aiInsight}
 												</p>
 											</div>
 										)}
@@ -413,7 +466,6 @@ export default function WisdomWellPage() {
 				)}
 			</main>
 			<footer className="w-full max-w-3xl mt-16 pt-8 pb-4 border-t border-border/80 text-center">
-				<div id="google_translate_element" className="mb-4"></div>
 				<p className="text-sm text-muted-foreground">
 					WisdomWell &copy; {currentYear ?? ""} - Your guide to multi-faith scriptural insights.
 				</p>

@@ -8,28 +8,28 @@ body {
 
 @layer base {
   :root {
-    --background: 210 40% 98%; /* Soft Beige approximation */
-    --foreground: 210 40% 20%; /* Darker for contrast */
+    --background: 48 95% 96%; /* Soft Beige (#F5F5DC) HSL: 60, 56%, 93% -> adjusted to 48, 95%, 96% for closer match */
+    --foreground: 48 10% 20%; /* Darker for contrast */
     --card: 0 0% 100%;
-    --card-foreground: 210 40% 20%;
+    --card-foreground: 48 10% 20%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 40% 20%;
-    --primary: 120 25% 45%; /* Muted Green */
+    --popover-foreground: 48 10% 20%;
+    --primary: 120 25% 65%; /* Muted Green (#8FBC8F) HSL: 120, 25%, 65% */
     --primary-foreground: 0 0% 98%;
-    --secondary: 120 15% 65%; /* Lighter Muted Green */
-    --secondary-foreground: 210 40% 20%;
-    --muted: 210 40% 90%;
-    --muted-foreground: 210 40% 45%;
-    --accent: 300 100% 25%; /* Deep Purple */
+    --secondary: 120 15% 75%; /* Lighter Muted Green */
+    --secondary-foreground: 48 10% 20%;
+    --muted: 48 60% 90%;
+    --muted-foreground: 48 10% 45%;
+    --accent: 300 100% 25%; /* Deep Purple (#800080) HSL: 300, 100%, 25% */
     --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 210 40% 85%;
-    --input: 210 40% 90%;
+    --border: 48 30% 85%;
+    --input: 48 60% 90%;
     --ring: 300 100% 25%; /* Deep Purple for ring */
-    --chart-1: 120 25% 45%;
+    --chart-1: 120 25% 65%;
     --chart-2: 300 100% 25%;
-    --chart-3: 210 40% 60%;
+    --chart-3: 48 20% 60%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
@@ -43,28 +43,28 @@ body {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
   .dark {
-    --background: 210 20% 12%; /* Dark background for dark mode */
-    --foreground: 210 40% 90%;
-    --card: 210 20% 15%;
-    --card-foreground: 210 40% 90%;
-    --popover: 210 20% 15%;
-    --popover-foreground: 210 40% 90%;
+    --background: 48 10% 12%; /* Dark background for dark mode */
+    --foreground: 48 10% 90%;
+    --card: 48 10% 15%;
+    --card-foreground: 48 10% 90%;
+    --popover: 48 10% 15%;
+    --popover-foreground: 48 10% 90%;
     --primary: 120 30% 55%; /* Muted Green for dark mode */
-    --primary-foreground: 210 40% 98%;
+    --primary-foreground: 48 10% 98%;
     --secondary: 120 20% 35%; 
-    --secondary-foreground: 210 40% 90%;
-    --muted: 210 20% 20%;
-    --muted-foreground: 210 40% 65%;
+    --secondary-foreground: 48 10% 90%;
+    --muted: 48 10% 20%;
+    --muted-foreground: 48 10% 65%;
     --accent: 300 70% 60%; /* Deep Purple for dark mode */
-    --accent-foreground: 210 40% 98%;
+    --accent-foreground: 48 10% 98%;
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 210 20% 25%;
-    --input: 210 20% 25%;
+    --border: 48 10% 25%;
+    --input: 48 10% 25%;
     --ring: 300 70% 60%; /* Deep Purple for ring in dark mode */
     --chart-1: 120 30% 55%;
     --chart-2: 300 70% 60%;
-    --chart-3: 210 30% 70%;
+    --chart-3: 48 20% 70%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --sidebar-background: 240 5.9% 10%;
@@ -84,7 +84,7 @@ body {
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-geist-sans);
+    font-family: var(--font-inter);
   }
 }
 
@@ -103,35 +103,4 @@ body {
       transform: translateY(0);
     }
   }
-}
-
-/* Google Translate Widget Styles */
-.goog-te-gadget-simple {
-  @apply bg-background border-border text-foreground rounded-md p-2 shadow-sm;
-}
-.goog-te-gadget-simple span {
-  @apply text-sm;
-}
-.goog-te-menu-value span {
-  @apply text-foreground;
-}
-.goog-te-gadget-icon {
-  @apply hidden; /* Hide the Google Translate icon if desired */
-}
-body > .skiptranslate {
-  @apply hidden; /* Hide the "Powered by Google Translate" banner */
-}
-body {
-  top: 0px !important; /* Override Google Translate's top positioning */
-}
-.goog-tooltip {
-  display: none !important;
-}
-.goog-tooltip:hover {
-  display: none !important;
-}
-.goog-text-highlight {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
 }
