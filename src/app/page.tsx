@@ -37,17 +37,17 @@ import {
 	BookOpenText,
 	Sparkles,
 	ScrollText,
-	HelpingHand,
-	Paintbrush,
-	Moon,
-	BookOpen,
-	Sprout,
-	Leaf,
-	Circle as CircleIconTaoism,
-	Star,
-	Flower2,
+	BookHeart, // For Christianity (general symbol)
+	HandHeart, // For Jainism (Ahimsa, compassion)
+	Gem, // For Sikhism (precious teachings/Guru)
+	Palette, // For Hinduism (diversity, richness) - can be generic for art/creation
 	LucideProps,
-	Gem
+	Wheat, // For Buddhism (growth, harvest of wisdom)
+	MoonStar, // For Islam
+	Flower2, // For Buddhism (Lotus alternative)
+	Hand, // For Jainism (alternative/general)
+	Star, // For Judaism (Star of David)
+	Circle as CircleIcon, // For Taoism (YinYang alternative if YinYang not found)
 } from "lucide-react";
 
 const ALL_RELIGIONS = [
@@ -69,10 +69,14 @@ const formSchema = z.object({
 	}),
 	selectedReligions: z
 		.array(z.string())
-		.refine((value) => value.length > 0, {
+		.refine((value) => value.some(item => ALL_RELIGIONS.includes(item as Religion)), { // Ensure selected items are valid religions
+			message: "You have to select at least one religion.",
+		})
+		.refine((value) => value.length > 0, { // Check if array is not empty
 			message: "You have to select at least one religion.",
 		}),
 });
+
 
 export default function WisdomWellPage() {
 	const [isLoading, setIsLoading] = React.useState(false);
@@ -81,6 +85,12 @@ export default function WisdomWellPage() {
 	const [error, setError] = React.useState<string | null>(null);
 	const [submittedQuestion, setSubmittedQuestion] = React.useState<string | null>(null);
 	const { toast } = useToast();
+	const [currentYear, setCurrentYear] = React.useState<number | null>(null);
+
+	React.useEffect(() => {
+		setCurrentYear(new Date().getFullYear());
+	}, []);
+
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -126,15 +136,15 @@ export default function WisdomWellPage() {
 
 	const getReligionIcon = (religion: string): React.FC<LucideProps> => {
 		const religionIcons: Record<string, React.FC<LucideProps>> = {
-			Hinduism: Paintbrush,
-			Islam: Moon,
-			Christianity: BookOpen,
-			Buddhism: Sprout,
-			Judaism: Star,
-			Jainism: HelpingHand,
-			Sikhism: Leaf,
-			Taoism: CircleIconTaoism,
-			Default: HelpingHand,
+			Hinduism: Palette,
+			Islam: MoonStar,
+			Christianity: BookHeart,
+			Buddhism: Flower2, // Using Flower2 as a stand-in for Lotus
+			Judaism: Star, // Using Star as a stand-in for Menorah/Star of David
+			Jainism: Hand, // Using Hand as a stand-in
+			Sikhism: Gem,
+			Taoism: CircleIcon, // Using CircleIcon as a stand-in for YinYang
+			Default: Wheat, // Default icon
 		};
 		return religionIcons[religion] || religionIcons["Default"];
 	};
@@ -145,23 +155,24 @@ export default function WisdomWellPage() {
 		Christianity: "text-sky-500",
 		Buddhism: "text-pink-500",
 		Judaism: "text-blue-600",
-		Jainism: "text-yellow-500", // Adjusted for visibility
+		Jainism: "text-yellow-600",
 		Sikhism: "text-purple-500",
-		Taoism: "text-gray-500",
-		Default: "text-slate-400",
+		Taoism: "text-gray-600",
+		Default: "text-slate-500",
 	};
 
 	const religionBadgeStyles: Record<string, string> = {
-		Hinduism: "bg-orange-100 text-orange-700 border-orange-200",
-		Islam: "bg-emerald-100 text-emerald-700 border-emerald-200",
-		Christianity: "bg-sky-100 text-sky-700 border-sky-200",
-		Buddhism: "bg-pink-100 text-pink-700 border-pink-200",
-		Judaism: "bg-blue-100 text-blue-700 border-blue-200",
-		Jainism: "bg-yellow-100 text-yellow-700 border-yellow-200",
-		Sikhism: "bg-purple-100 text-purple-700 border-purple-200",
-		Taoism: "bg-gray-100 text-gray-700 border-gray-200",
-		Default: "bg-slate-100 text-slate-700 border-slate-200",
+		Hinduism: "bg-orange-100 text-orange-800 border-orange-300",
+		Islam: "bg-emerald-100 text-emerald-800 border-emerald-300",
+		Christianity: "bg-sky-100 text-sky-800 border-sky-300",
+		Buddhism: "bg-pink-100 text-pink-800 border-pink-300",
+		Judaism: "bg-blue-100 text-blue-800 border-blue-300",
+		Jainism: "bg-yellow-100 text-yellow-800 border-yellow-300",
+		Sikhism: "bg-purple-100 text-purple-800 border-purple-300",
+		Taoism: "bg-gray-100 text-gray-800 border-gray-300",
+		Default: "bg-slate-100 text-slate-800 border-slate-300",
 	};
+
 
 	const getReligionIconColor = (religion: string) => {
 		return religionIconColors[religion] || religionIconColors["Default"];
@@ -239,22 +250,26 @@ export default function WisdomWellPage() {
 													return (
 														<FormItem
 															key={religion}
-															className="flex flex-row items-center space-x-2 p-2.5 rounded-md hover:bg-muted/50 transition-colors cursor-pointer border border-input hover:border-primary/50 data-[state=checked]:border-primary"
+															className="flex flex-row items-center space-x-2 p-2.5 rounded-md hover:bg-muted/50 transition-colors cursor-pointer border border-input hover:border-primary/50 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
 														>
 															<FormControl>
 																<Checkbox
-																	checked={field.value.includes(religion)}
+																	checked={field.value?.includes(religion)}
+																	onCheckedChange={(checked) => {
+																		return checked
+																			? field.onChange([...(field.value || []), religion])
+																			: field.onChange(
+																					(field.value || []).filter(
+																						(value) => value !== religion
+																					)
+																				);
+																	}}
 																	aria-labelledby={`religion-label-${religion}`}
 																	id={`religion-checkbox-${religion}`}
-																	onCheckedChange={(checked) => {
-																		const newValue = checked
-																			? [...field.value, religion]
-																			: field.value.filter((r: string) => r !== religion);
-																		form.setValue("selectedReligions", newValue);
-																	}}
+																	className="border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
 																/>
 															</FormControl>
-															<FormLabel id={`religion-label-${religion}`} htmlFor={`religion-checkbox-${religion}`} className="font-normal flex items-center cursor-pointer text-sm select-none">
+															<FormLabel id={`religion-label-${religion}`} htmlFor={`religion-checkbox-${religion}`} className="font-normal flex items-center cursor-pointer text-sm select-none w-full">
 																<ReligionIcon className={`w-4 h-4 mr-2 ${iconColor} flex-shrink-0`} />
 																{religion}
 															</FormLabel>
@@ -310,7 +325,7 @@ export default function WisdomWellPage() {
 					<Card className="mb-6 shadow-lg rounded-xl animate-fadeIn border">
 						<CardHeader className="pb-3 pt-4">
 							<CardTitle className="text-lg text-primary flex items-center">
-								<HelpingHand className="w-5 h-5 mr-2.5 text-accent flex-shrink-0" />
+								<HandHeart className="w-5 h-5 mr-2.5 text-accent flex-shrink-0" />
 								Your Question:
 							</CardTitle>
 						</CardHeader>
@@ -333,7 +348,7 @@ export default function WisdomWellPage() {
 									className="shadow-lg animate-fadeIn rounded-xl overflow-hidden border"
 									style={{ animationDelay: `${index * 100}ms`, animationDuration: '0.4s' }}
 								>
-									<CardHeader className={`pb-3 pt-4 px-5 bg-muted/20 border-b ${entry.religion.toLowerCase()}-header-bg`}>
+									<CardHeader className={`pb-3 pt-4 px-5 bg-muted/20 border-b`}>
 										<div className="flex items-center justify-between">
 											<CardTitle className="text-lg text-primary flex items-center">
 												<ReligionIcon
@@ -349,7 +364,7 @@ export default function WisdomWellPage() {
 											</Badge>
 										</div>
 										<CardDescription className="text-xs text-muted-foreground pt-1 pl-[calc(1.25rem+0.625rem)]"> {/* 1.25rem for icon width, 0.625rem for mr */}
-											{entry.scripture}, Chapter {entry.chapter}, Verse(s) {entry.verses}
+											From: {entry.scripture}{entry.category ? ` (${entry.category})` : ''}, Chapter {entry.chapter}, Verse(s) {entry.verses}
 										</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-3 p-5">
@@ -369,7 +384,6 @@ export default function WisdomWellPage() {
 													{`Purpose according to ${entry.scripture}:`}
 												</h3>
 												<p className="text-foreground/80 leading-relaxed text-[0.9rem]">
-													{/* AI insight prefix is now handled by the prompt */}
 													{entry.aiInsight}
 												</p>
 											</div>
@@ -397,7 +411,10 @@ export default function WisdomWellPage() {
 			</main>
 			<footer className="w-full max-w-3xl mt-16 pt-8 pb-4 border-t border-border/80 text-center">
 				<p className="text-sm text-muted-foreground">
-					WisdomWell &copy; {new Date().getFullYear()} - Your guide to multi-faith scriptural insights.
+					WisdomWell &copy; {currentYear ?? ""} - Your guide to multi-faith scriptural insights.
+				</p>
+				<p className="text-xs text-muted-foreground/80 mt-1">
+					Created by SOZIB SORKAR
 				</p>
 				<p className="text-xs text-muted-foreground/70 mt-2">
 					Remember to approach sacred texts with respect and an open mind. Interpretations may vary. This tool is for informational purposes.
@@ -406,5 +423,3 @@ export default function WisdomWellPage() {
 		</div>
 	);
 }
-
-    
