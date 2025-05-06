@@ -29,9 +29,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-// import { Label } from "@/components/ui/label"; // Not used directly, FormLabel is used.
 import { useToast } from "@/hooks/use-toast";
-// import { Toaster } from "@/components/ui/toaster"; // Toaster is in RootLayout
 import {
 	Loader2,
 	Search,
@@ -39,15 +37,14 @@ import {
 	BookOpenText,
 	Sparkles,
 	ScrollText,
-	HelpingHand, 
-	Paintbrush, 
-	Moon, 
-	BookOpen, 
-	Sprout, 
-	HandHelping as HandIconJainism, // Renamed for clarity
-	Leaf, 
-	Circle as CircleIconTaoism, // Renamed for clarity
-	CircleHelp, 
+	HelpingHand,
+	Paintbrush,
+	Moon,
+	BookOpen,
+	Sprout,
+	Leaf,
+	Circle as CircleIconTaoism,
+	CircleHelp,
 	LucideProps,
 } from "lucide-react";
 
@@ -69,7 +66,6 @@ const StarOfDavidIcon: React.FC<LucideProps> = (props) => (
   </svg>
 );
 
-
 const ALL_RELIGIONS = [
 	"Hinduism",
 	"Islam",
@@ -89,7 +85,7 @@ const formSchema = z.object({
 	}),
 	selectedReligions: z
 		.array(z.string())
-		.refine((value) => value.length > 0, { 
+		.refine((value) => value.length > 0, {
 			message: "You have to select at least one religion.",
 		}),
 });
@@ -99,14 +95,14 @@ export default function WisdomWellPage() {
 	const [scriptureData, setScriptureData] =
 		React.useState<ScriptureRetrievalOutput | null>(null);
 	const [error, setError] = React.useState<string | null>(null);
-  const [submittedQuestion, setSubmittedQuestion] = React.useState<string | null>(null);
+	const [submittedQuestion, setSubmittedQuestion] = React.useState<string | null>(null);
 	const { toast } = useToast();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			question: "",
-			selectedReligions: [], 
+			selectedReligions: [],
 		},
 	});
 
@@ -114,7 +110,7 @@ export default function WisdomWellPage() {
 		setIsLoading(true);
 		setError(null);
 		setScriptureData(null);
-    setSubmittedQuestion(values.question);
+		setSubmittedQuestion(values.question);
 
 		try {
 			const input: ScriptureRetrievalInput = {
@@ -127,7 +123,7 @@ export default function WisdomWellPage() {
 				toast({
 					title: "No scriptures found",
 					description: "Please try a different question or broaden your religion selection.",
-          variant: "default", 
+					variant: "default",
 				});
 			}
 		} catch (e) {
@@ -151,14 +147,14 @@ export default function WisdomWellPage() {
 			Christianity: BookOpen,
 			Buddhism: Sprout,
 			Judaism: StarOfDavidIcon,
-			Jainism: HandIconJainism, 
+			Jainism: HelpingHand,
 			Sikhism: Leaf,
 			Taoism: CircleIconTaoism,
 			Default: HelpingHand,
 		};
 		return religionIcons[religion] || religionIcons["Default"];
 	};
-	
+
 	const religionIconColors: Record<string, string> = {
 		Hinduism: "text-orange-500",
 		Islam: "text-emerald-500",
@@ -171,7 +167,7 @@ export default function WisdomWellPage() {
 		Default: "text-slate-400",
 	};
 
-  const religionBadgeStyles: Record<string, string> = {
+	const religionBadgeStyles: Record<string, string> = {
 		Hinduism: "bg-orange-100 text-orange-700 border-orange-200",
 		Islam: "bg-emerald-100 text-emerald-700 border-emerald-200",
 		Christianity: "bg-sky-100 text-sky-700 border-sky-200",
@@ -183,14 +179,32 @@ export default function WisdomWellPage() {
 		Default: "bg-slate-100 text-slate-700 border-slate-200",
 	};
 
-
 	const getReligionIconColor = (religion: string) => {
 		return religionIconColors[religion] || religionIconColors["Default"];
 	};
 
-  const getReligionBadgeStyle = (religion: string) => {
-    return religionBadgeStyles[religion] || religionBadgeStyles["Default"];
-  }
+	const getReligionBadgeStyle = (religion: string) => {
+		return religionBadgeStyles[religion] || religionBadgeStyles["Default"];
+	};
+
+	// Local state to manage selected religions for the UI
+	const [selectedReligions, setSelectedReligions] = React.useState<string[]>([]);
+
+	// Handler to update selected religions
+	const handleReligionChange = (religion: string) => {
+		setSelectedReligions((prev) => {
+			if (prev.includes(religion)) {
+				return prev.filter((r) => r !== religion);
+			} else {
+				return [...prev, religion];
+			}
+		});
+	};
+
+	React.useEffect(() => {
+		// Set the form's selectedReligions field whenever the local state changes
+		form.setValue("selectedReligions", selectedReligions);
+	}, [selectedReligions, form.setValue]);
 
 	return (
 		<div className="min-h-screen bg-background text-foreground flex flex-col items-center p-4 md:p-8 selection:bg-accent/30 selection:text-accent-foreground">
@@ -212,9 +226,9 @@ export default function WisdomWellPage() {
 						<CardTitle className="text-2xl text-primary">
 							Seek Wisdom
 						</CardTitle>
-            <CardDescription>
-                Enter your question and select the religions whose sacred texts you'd like to explore.
-            </CardDescription>
+						<CardDescription>
+							Enter your question and select the religions whose sacred texts you'd like to explore.
+						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<Form {...form}>
@@ -245,56 +259,42 @@ export default function WisdomWellPage() {
 								<FormField
 									control={form.control}
 									name="selectedReligions"
-									render={() => ( // Removed 'field' from render prop as it's accessed inside map
+									render={() => (
 										<FormItem>
 											<div className="mb-3">
 												<FormLabel className="text-lg font-semibold">
 													Select Religions
 												</FormLabel>
-                        <p className="text-sm text-muted-foreground">Choose at least one religion.</p>
+												<p className="text-sm text-muted-foreground">Choose at least one religion.</p>
 											</div>
 											<div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
 												{ALL_RELIGIONS.map((religion) => {
-                            const ReligionIcon = getReligionIcon(religion);
-                            const iconColor = getReligionIconColor(religion);
-                            return (
-														<FormField
+													const ReligionIcon = getReligionIcon(religion);
+													const iconColor = getReligionIconColor(religion);
+													return (
+														<FormItem
 															key={religion}
-															control={form.control}
-															name="selectedReligions" // This specific field for each checkbox
-															render={({ field: checkboxField }) => { // Use a different name for this inner field
-																return (
-																	<FormItem
-																		key={religion}
-																		className="flex flex-row items-center space-x-2 p-2.5 rounded-md hover:bg-muted/50 transition-colors cursor-pointer border border-input hover:border-primary/50 data-[state=checked]:border-primary"
-                                    onClick={() => {
-                                        const isChecked = checkboxField.value?.includes(religion);
-                                        const newValue = isChecked
-                                            ? checkboxField.value?.filter((value) => value !== religion)
-                                            : [...(checkboxField.value || []), religion];
-                                        checkboxField.onChange(newValue);
-                                    }}
-                                    data-state={checkboxField.value?.includes(religion) ? 'checked' : 'unchecked'}
-																	>
-																		<FormControl>
-																			<Checkbox
-																				checked={checkboxField.value?.includes(religion)}
-                                        aria-labelledby={`religion-label-${religion}`}
-                                        id={`religion-checkbox-${religion}`}
-																			/>
-																		</FormControl>
-																		<FormLabel id={`religion-label-${religion}`} htmlFor={`religion-checkbox-${religion}`} className="font-normal flex items-center cursor-pointer text-sm select-none">
-                                      <ReligionIcon className={`w-4 h-4 mr-2 ${iconColor} flex-shrink-0`} />
-																			{religion}
-																		</FormLabel>
-																	</FormItem>
-																);
-															}}
-														/>
-                            );
-                          })}
+															className="flex flex-row items-center space-x-2 p-2.5 rounded-md hover:bg-muted/50 transition-colors cursor-pointer border border-input hover:border-primary/50 data-[state=checked]:border-primary"
+															onClick={() => handleReligionChange(religion)}
+															data-state={selectedReligions.includes(religion) ? 'checked' : 'unchecked'}
+														>
+															<FormControl>
+																<Checkbox
+																	checked={selectedReligions.includes(religion)}
+																	aria-labelledby={`religion-label-${religion}`}
+																	id={`religion-checkbox-${religion}`}
+																	onChange={() => handleReligionChange(religion)} // Ensure checkbox also triggers the change
+																/>
+															</FormControl>
+															<FormLabel id={`religion-label-${religion}`} htmlFor={`religion-checkbox-${religion}`} className="font-normal flex items-center cursor-pointer text-sm select-none">
+																<ReligionIcon className={`w-4 h-4 mr-2 ${iconColor} flex-shrink-0`} />
+																{religion}
+															</FormLabel>
+														</FormItem>
+													);
+												})}
 											</div>
-											<FormMessage /> {/* For the selectedReligions array as a whole */}
+											<FormMessage />
 										</FormItem>
 									)}
 								/>
@@ -323,12 +323,12 @@ export default function WisdomWellPage() {
 				</Card>
 
 				{isLoading && (
-          <div className="flex flex-col justify-center items-center p-10 rounded-xl bg-card shadow-lg border animate-fadeIn">
-              <Loader2 className="mr-3 h-10 w-10 animate-spin text-primary mb-4" />
-              <p className="text-xl text-muted-foreground font-medium">Seeking wisdom from the ancients...</p>
-              <p className="text-sm text-muted-foreground/80">Please wait a moment.</p>
-          </div>
-        )}
+					<div className="flex flex-col justify-center items-center p-10 rounded-xl bg-card shadow-lg border animate-fadeIn">
+						<Loader2 className="mr-3 h-10 w-10 animate-spin text-primary mb-4" />
+						<p className="text-xl text-muted-foreground font-medium">Seeking wisdom from the ancients...</p>
+						<p className="text-sm text-muted-foreground/80">Please wait a moment.</p>
+					</div>
+				)}
 
 				{error && !isLoading && (
 					<Alert variant="destructive" className="mb-8 animate-fadeIn rounded-lg shadow-md p-5">
@@ -338,105 +338,103 @@ export default function WisdomWellPage() {
 					</Alert>
 				)}
 
-        {submittedQuestion && !isLoading && (scriptureData || error) && (
-            <Card className="mb-6 shadow-lg rounded-xl animate-fadeIn border">
-                <CardHeader className="pb-3 pt-4">
-                    <CardTitle className="text-lg text-primary flex items-center">
-                        <CircleHelp className="w-5 h-5 mr-2.5 text-accent flex-shrink-0"/>
-                        Your Question:
-                    </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0 pb-4">
-                    <p className="text-md text-foreground/90 italic">"{submittedQuestion}"</p>
-                </CardContent>
-            </Card>
-        )}
+				{submittedQuestion && !isLoading && (scriptureData || error) && (
+					<Card className="mb-6 shadow-lg rounded-xl animate-fadeIn border">
+						<CardHeader className="pb-3 pt-4">
+							<CardTitle className="text-lg text-primary flex items-center">
+								<CircleHelp className="w-5 h-5 mr-2.5 text-accent flex-shrink-0" />
+								Your Question:
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="pt-0 pb-4">
+							<p className="text-md text-foreground/90 italic">"{submittedQuestion}"</p>
+						</CardContent>
+					</Card>
+				)}
 
 				{scriptureData && scriptureData.scriptureEntries.length > 0 && !isLoading && (
 					<div className="space-y-6">
 						<h2 className="text-2xl font-semibold text-primary mb-4 mt-2">Wisdom Found:</h2>
 						{scriptureData.scriptureEntries.map((entry, index) => {
-              const ReligionIcon = getReligionIcon(entry.religion);
-              const iconColor = getReligionIconColor(entry.religion);
-              const badgeStyle = getReligionBadgeStyle(entry.religion);
-              return (
-							<Card
-								key={index}
-								className="shadow-lg animate-fadeIn rounded-xl overflow-hidden border"
-								style={{ animationDelay: `${index * 100}ms`, animationDuration: '0.4s' }}
-							>
-								<CardHeader className={`pb-3 pt-4 px-5 bg-muted/20 border-b ${entry.religion.toLowerCase()}-header-bg`}>
-									<div className="flex items-center justify-between">
-										<CardTitle className="text-lg text-primary flex items-center">
-											<ReligionIcon
-												className={`w-5 h-5 mr-2.5 ${iconColor} flex-shrink-0`}
-											/>
-                      {entry.religion}
-										</CardTitle>
-										<Badge
-											variant="outline"
-											className={`ml-2 ${badgeStyle} rounded-full px-2.5 py-0.5 text-xs font-medium`}
-										>
-											{entry.scripture}
-										</Badge>
-									</div>
-                  <CardDescription className="text-xs text-muted-foreground pt-1 pl-[calc(1.25rem+0.625rem)]"> {/* 1.25rem for icon width, 0.625rem for mr */}
-                       {entry.scripture}, Chapter {entry.chapter}, Verse(s) {entry.verses}
-                  </CardDescription>
-								</CardHeader>
-								<CardContent className="space-y-3 p-5">
-									<div>
-										<h3 className="font-semibold text-base mb-1.5 text-primary flex items-center">
-											<BookOpenText className="w-4 h-4 mr-2 text-accent flex-shrink-0" />
-											Quote:
-										</h3>
-										<blockquote className="text-foreground/90 leading-relaxed border-l-4 border-accent pl-3.5 py-1 italic text-[0.9rem]">
-											{entry.answer}
-										</blockquote>
-									</div>
-									{entry.aiInsight && (
+							const ReligionIcon = getReligionIcon(entry.religion);
+							const iconColor = getReligionIconColor(entry.religion);
+							const badgeStyle = getReligionBadgeStyle(entry.religion);
+							return (
+								<Card
+									key={index}
+									className="shadow-lg animate-fadeIn rounded-xl overflow-hidden border"
+									style={{ animationDelay: `${index * 100}ms`, animationDuration: '0.4s' }}
+								>
+									<CardHeader className={`pb-3 pt-4 px-5 bg-muted/20 border-b ${entry.religion.toLowerCase()}-header-bg`}>
+										<div className="flex items-center justify-between">
+											<CardTitle className="text-lg text-primary flex items-center">
+												<ReligionIcon
+													className={`w-5 h-5 mr-2.5 ${iconColor} flex-shrink-0`}
+												/>
+												{entry.religion}
+											</CardTitle>
+											<Badge
+												variant="outline"
+												className={`ml-2 ${badgeStyle} rounded-full px-2.5 py-0.5 text-xs font-medium`}
+											>
+												{entry.scripture}
+											</Badge>
+										</div>
+										<CardDescription className="text-xs text-muted-foreground pt-1 pl-[calc(1.25rem+0.625rem)]"> {/* 1.25rem for icon width, 0.625rem for mr */}
+											{entry.scripture}, Chapter {entry.chapter}, Verse(s) {entry.verses}
+										</CardDescription>
+									</CardHeader>
+									<CardContent className="space-y-3 p-5">
 										<div>
 											<h3 className="font-semibold text-base mb-1.5 text-primary flex items-center">
-												<Sparkles className="w-4 h-4 mr-2 text-accent flex-shrink-0" />
-												{`Purpose according to ${entry.scripture}:`}
+												<BookOpenText className="w-4 h-4 mr-2 text-accent flex-shrink-0" />
+												Quote:
 											</h3>
-											<p className="text-foreground/80 leading-relaxed text-[0.9rem]">
-												{/* AI insight prefix is now handled by the prompt */}
-												{entry.aiInsight}
-											</p>
+											<blockquote className="text-foreground/90 leading-relaxed border-l-4 border-accent pl-3.5 py-1 italic text-[0.9rem]">
+												{entry.answer}
+											</blockquote>
 										</div>
-									)}
-								</CardContent>
-							</Card>
-              );
-            })}
+										{entry.aiInsight && (
+											<div>
+												<h3 className="font-semibold text-base mb-1.5 text-primary flex items-center">
+													<Sparkles className="w-4 h-4 mr-2 text-accent flex-shrink-0" />
+													{`Purpose according to ${entry.scripture}:`}
+												</h3>
+												<p className="text-foreground/80 leading-relaxed text-[0.9rem]">
+													{/* AI insight prefix is now handled by the prompt */}
+													{entry.aiInsight}
+												</p>
+											</div>
+										)}
+									</CardContent>
+								</Card>
+							);
+						})}
 					</div>
 				)}
 				{scriptureData && scriptureData.scriptureEntries.length === 0 && !isLoading && !error && (
-          <Card className="shadow-md animate-fadeIn text-center rounded-xl p-6 border-2 border-dashed border-muted-foreground/30 bg-card">
-              <CardHeader className="p-0 mb-3">
-                  <CardTitle className="text-xl text-primary font-medium">No Scriptures Found</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                  <p className="text-muted-foreground">
-                      We couldn't find any scriptures matching your query for the selected religions.
-                      <br />
-                      Please try rephrasing your question or selecting different religions.
-                  </p>
-              </CardContent>
-          </Card>
-        )}
+					<Card className="shadow-md animate-fadeIn text-center rounded-xl p-6 border-2 border-dashed border-muted-foreground/30 bg-card">
+						<CardHeader className="p-0 mb-3">
+							<CardTitle className="text-xl text-primary font-medium">No Scriptures Found</CardTitle>
+						</CardHeader>
+						<CardContent className="p-0">
+							<p className="text-muted-foreground">
+								We couldn't find any scriptures matching your query for the selected religions.
+								<br />
+								Please try rephrasing your question or selecting different religions.
+							</p>
+						</CardContent>
+					</Card>
+				)}
 			</main>
-      <footer className="w-full max-w-3xl mt-16 pt-8 pb-4 border-t border-border/80 text-center">
-          <p className="text-sm text-muted-foreground">
-              WisdomWell &copy; {new Date().getFullYear()} - Your guide to multi-faith scriptural insights.
-          </p>
-            <p className="text-xs text-muted-foreground/70 mt-2">
-              Remember to approach sacred texts with respect and an open mind. Interpretations may vary. This tool is for informational purposes.
-          </p>
-      </footer>
+			<footer className="w-full max-w-3xl mt-16 pt-8 pb-4 border-t border-border/80 text-center">
+				<p className="text-sm text-muted-foreground">
+					WisdomWell &copy; {new Date().getFullYear()} - Your guide to multi-faith scriptural insights.
+				</p>
+				<p className="text-xs text-muted-foreground/70 mt-2">
+					Remember to approach sacred texts with respect and an open mind. Interpretations may vary. This tool is for informational purposes.
+				</p>
+			</footer>
 		</div>
 	);
 }
-
-    
