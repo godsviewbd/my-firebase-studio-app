@@ -44,26 +44,11 @@ import {
 	Sprout,
 	Leaf,
 	Circle as CircleIconTaoism,
+	Star,
+	Flower2,
 	LucideProps,
+	Gem
 } from "lucide-react";
-
-// Inline SVG for Star of David as Lucide doesn't have a direct equivalent
-const StarOfDavidIcon: React.FC<LucideProps> = (props) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    {...props}
-  >
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.73 5.82 22 7 14.14l-5-4.87 6.91-1.01L12 2z" />
-  </svg>
-);
 
 const ALL_RELIGIONS = [
 	"Hinduism",
@@ -145,7 +130,7 @@ export default function WisdomWellPage() {
 			Islam: Moon,
 			Christianity: BookOpen,
 			Buddhism: Sprout,
-			Judaism: StarOfDavidIcon,
+			Judaism: Star,
 			Jainism: HelpingHand,
 			Sikhism: Leaf,
 			Taoism: CircleIconTaoism,
@@ -199,12 +184,6 @@ export default function WisdomWellPage() {
 			}
 		});
 	};
-
-	//This useEffect is no longer needed due to the bug fix below.
-	// React.useEffect(() => {
-	// 	// Set the form's selectedReligions field whenever the local state changes
-	// 	form.setValue("selectedReligions", selectedReligions);
-	// }, [selectedReligions, form.setValue]);
 
 	return (
 		<div className="min-h-screen bg-background text-foreground flex flex-col items-center p-4 md:p-8 selection:bg-accent/30 selection:text-accent-foreground">
@@ -275,23 +254,27 @@ export default function WisdomWellPage() {
 														<FormItem
 															key={religion}
 															className="flex flex-row items-center space-x-2 p-2.5 rounded-md hover:bg-muted/50 transition-colors cursor-pointer border border-input hover:border-primary/50 data-[state=checked]:border-primary"
-															onClick={() => handleReligionChange(religion)}
-															data-state={selectedReligions.includes(religion) ? 'checked' : 'unchecked'}
+															onClick={() => {
+																// Update the form's selectedReligions field directly
+																const newValue = field.value.includes(religion)
+																	? field.value.filter((r: string) => r !== religion)
+																	: [...field.value, religion];
+																field.onChange(newValue);
+																handleReligionChange(religion);
+															}}
+															data-state={field.value.includes(religion) ? 'checked' : 'unchecked'}
 														>
 															<FormControl>
 																<Checkbox
-																	checked={selectedReligions.includes(religion)}
+																	checked={field.value.includes(religion)}
 																	aria-labelledby={`religion-label-${religion}`}
 																	id={`religion-checkbox-${religion}`}
 																	onCheckedChange={(checked) => {
-																		//This onChange function is the bug fix.
-																		//By passing in the checked value and only updating the selectedReligions array, 
-																		//the maximum update depth exceeded error is resolved.
-																		if (checked) {
-																			setSelectedReligions([...selectedReligions, religion]);
-																		} else {
-																			setSelectedReligions(selectedReligions.filter((r) => r !== religion));
-																		}
+																		const newValue = checked
+																			? [...field.value, religion]
+																			: field.value.filter((r: string) => r !== religion);
+																		field.onChange(newValue);
+																		handleReligionChange(religion);
 																	}}
 																/>
 															</FormControl>
@@ -447,4 +430,3 @@ export default function WisdomWellPage() {
 		</div>
 	);
 }
-
