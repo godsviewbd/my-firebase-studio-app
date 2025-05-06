@@ -44,7 +44,6 @@ import {
 	Sprout,
 	Leaf,
 	Circle as CircleIconTaoism,
-	CircleHelp,
 	LucideProps,
 } from "lucide-react";
 
@@ -201,10 +200,11 @@ export default function WisdomWellPage() {
 		});
 	};
 
-	React.useEffect(() => {
-		// Set the form's selectedReligions field whenever the local state changes
-		form.setValue("selectedReligions", selectedReligions);
-	}, [selectedReligions, form.setValue]);
+	//This useEffect is no longer needed due to the bug fix below.
+	// React.useEffect(() => {
+	// 	// Set the form's selectedReligions field whenever the local state changes
+	// 	form.setValue("selectedReligions", selectedReligions);
+	// }, [selectedReligions, form.setValue]);
 
 	return (
 		<div className="min-h-screen bg-background text-foreground flex flex-col items-center p-4 md:p-8 selection:bg-accent/30 selection:text-accent-foreground">
@@ -259,7 +259,7 @@ export default function WisdomWellPage() {
 								<FormField
 									control={form.control}
 									name="selectedReligions"
-									render={() => (
+									render={({ field }) => (
 										<FormItem>
 											<div className="mb-3">
 												<FormLabel className="text-lg font-semibold">
@@ -283,7 +283,16 @@ export default function WisdomWellPage() {
 																	checked={selectedReligions.includes(religion)}
 																	aria-labelledby={`religion-label-${religion}`}
 																	id={`religion-checkbox-${religion}`}
-																	onChange={() => handleReligionChange(religion)} // Ensure checkbox also triggers the change
+																	onCheckedChange={(checked) => {
+																		//This onChange function is the bug fix.
+																		//By passing in the checked value and only updating the selectedReligions array, 
+																		//the maximum update depth exceeded error is resolved.
+																		if (checked) {
+																			setSelectedReligions([...selectedReligions, religion]);
+																		} else {
+																			setSelectedReligions(selectedReligions.filter((r) => r !== religion));
+																		}
+																	}}
 																/>
 															</FormControl>
 															<FormLabel id={`religion-label-${religion}`} htmlFor={`religion-checkbox-${religion}`} className="font-normal flex items-center cursor-pointer text-sm select-none">
@@ -342,7 +351,7 @@ export default function WisdomWellPage() {
 					<Card className="mb-6 shadow-lg rounded-xl animate-fadeIn border">
 						<CardHeader className="pb-3 pt-4">
 							<CardTitle className="text-lg text-primary flex items-center">
-								<CircleHelp className="w-5 h-5 mr-2.5 text-accent flex-shrink-0" />
+								<HelpingHand className="w-5 h-5 mr-2.5 text-accent flex-shrink-0" />
 								Your Question:
 							</CardTitle>
 						</CardHeader>
@@ -438,3 +447,4 @@ export default function WisdomWellPage() {
 		</div>
 	);
 }
+
