@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import {
@@ -43,17 +45,36 @@ import {
 	Palette,
 	LucideProps,
 	Wheat,
-	MoonStar, 
-	Flower2, 
-	Hand, 
-	Star, 
-    CircleDot, // Replaced YinYang
+	MoonStar,
+	Flower2,
+	Hand,
+	Star,
+	CircleDot,
+    HelpCircle,
 } from "lucide-react";
+
+const ALL_RELIGIONS = [
+	"Hinduism",
+	"Islam",
+	"Christianity",
+	"Buddhism",
+	"Judaism",
+	"Jainism",
+	"Sikhism",
+	"Taoism",
+] as const;
+
+type Religion = (typeof ALL_RELIGIONS)[number];
 
 const formSchema = z.object({
 	question: z.string().min(10, {
 		message: "Question must be at least 10 characters.",
 	}),
+	selectedReligions: z
+		.array(z.string())
+		.refine((value) => value.some((item) => item), {
+			message: "You have to select at least one religion.",
+		}),
 });
 
 export default function WisdomWellPage() {
@@ -61,12 +82,14 @@ export default function WisdomWellPage() {
 	const [scriptureData, setScriptureData] =
 		React.useState<ScriptureRetrievalOutput | null>(null);
 	const [error, setError] = React.useState<string | null>(null);
+    const [submittedQuestion, setSubmittedQuestion] = React.useState<string | null>(null);
 	const { toast } = useToast();
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			question: "",
+			selectedReligions: [...ALL_RELIGIONS],
 		},
 	});
 
@@ -74,15 +97,19 @@ export default function WisdomWellPage() {
 		setIsLoading(true);
 		setError(null);
 		setScriptureData(null);
+        setSubmittedQuestion(values.question);
 
 		try {
-			const input: ScriptureRetrievalInput = { question: values.question };
+			const input: ScriptureRetrievalInput = {
+				question: values.question,
+				religions: values.selectedReligions as Religion[],
+			};
 			const result = await scriptureRetrieval(input);
 			setScriptureData(result);
 			if (result.scriptureEntries.length === 0) {
 				toast({
 					title: "No scriptures found",
-					description: "Please try a different question.",
+					description: "Please try a different question or broaden your religion selection.",
 				});
 			}
 		} catch (e) {
@@ -108,58 +135,8 @@ export default function WisdomWellPage() {
 			Judaism: Star,
 			Jainism: Hand,
 			Sikhism: Wheat,
-			Taoism: CircleDot, // Replaced YinYang with CircleDot
+			Taoism: CircleDot,
 			Default: HandHeart,
-		};
-		// For some reason, Tailwind tree-shaker removes the dynamic classes for icons
-		// So, we need to list them here to ensure they are included in the build.
-		// This is a workaround for a common issue with dynamic class names in Tailwind.
-		// Do not remove this, otherwise icons might not show up.
-		const dummy = {
-			Hinduism: React.createElement(Palette, {
-				className: "w-6 h-6 mr-3 bg-orange-500 text-white p-1 rounded-full",
-			}),
-			Islam: React.createElement(MoonStar, {
-				className: "w-6 h-6 mr-3 bg-emerald-500 text-white p-1 rounded-full",
-			}),
-			Christianity: React.createElement(BookHeart, {
-				className: "w-6 h-6 mr-3 bg-sky-500 text-white p-1 rounded-full",
-			}),
-			Buddhism: React.createElement(Flower2, { 
-				className: "w-6 h-6 mr-3 bg-pink-500 text-white p-1 rounded-full",
-			}),
-			Judaism: React.createElement(Star, { 
-				className: "w-6 h-6 mr-3 bg-blue-600 text-white p-1 rounded-full",
-			}),
-			Jainism: React.createElement(Hand, {
-				className: "w-6 h-6 mr-3 bg-yellow-500 text-white p-1 rounded-full",
-			}),
-			Sikhism: React.createElement(Wheat, {
-				className: "w-6 h-6 mr-3 bg-purple-500 text-white p-1 rounded-full",
-			}),
-			Taoism: React.createElement(CircleDot, { // Replaced YinYang with CircleDot
-				className: "w-6 h-6 mr-3 bg-gray-500 text-white p-1 rounded-full",
-			}),
-			Default: React.createElement(HandHeart, {
-				className: "w-6 h-6 mr-3 bg-gray-400 text-white p-1 rounded-full",
-			}),
-			BookOpenText: React.createElement(BookOpenText, {
-				className: "w-5 h-5 mr-2 text-accent",
-			}),
-			Sparkles: React.createElement(Sparkles, {
-				className: "w-5 h-5 mr-2 text-accent",
-			}),
-			ScrollText: React.createElement(ScrollText, {
-				className: "w-12 h-12 md:w-16 md:h-16 text-accent",
-			}),
-			Search: React.createElement(Search, { className: "mr-2 h-4 w-4" }),
-			Loader2: React.createElement(Loader2, {
-				className: "mr-2 h-4 w-4 animate-spin",
-			}),
-			AlertCircle: React.createElement(AlertCircle, { className: "h-4 w-4" }),
-			Gem: React.createElement(Gem, {
-				className: "w-6 h-6 mr-3 bg-teal-500 text-white p-1 rounded-full",
-			}),
 		};
 		return religionIcons[religion] || religionIcons["Default"];
 	};
@@ -226,6 +203,61 @@ export default function WisdomWellPage() {
 										</FormItem>
 									)}
 								/>
+
+								<FormField
+									control={form.control}
+									name="selectedReligions"
+									render={() => (
+										<FormItem>
+											<div className="mb-4">
+												<FormLabel className="text-lg">
+													Select Religions
+												</FormLabel>
+											</div>
+											<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+												{ALL_RELIGIONS.map((religion) => (
+													<FormField
+														key={religion}
+														control={form.control}
+														name="selectedReligions"
+														render={({ field }) => {
+															return (
+																<FormItem
+																	key={religion}
+																	className="flex flex-row items-start space-x-3 space-y-0"
+																>
+																	<FormControl>
+																		<Checkbox
+																			checked={field.value?.includes(religion)}
+																			onCheckedChange={(checked) => {
+																				return checked
+																					? field.onChange([
+																							...field.value,
+																							religion,
+																					  ])
+																					: field.onChange(
+																							field.value?.filter(
+																								(value) =>
+																									value !== religion
+																							)
+																					  );
+																			}}
+																		/>
+																	</FormControl>
+																	<FormLabel className="font-normal">
+																		{religion}
+																	</FormLabel>
+																</FormItem>
+															);
+														}}
+													/>
+												))}
+											</div>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+
 								<Button
 									type="submit"
 									className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-lg py-3 text-lg"
@@ -257,9 +289,26 @@ export default function WisdomWellPage() {
 					</Alert>
 				)}
 
+                {submittedQuestion && !isLoading && (scriptureData || error) && (
+                    <Card className="mb-8 shadow-lg rounded-xl animate-fadeIn">
+                        <CardHeader>
+                            <CardTitle className="text-xl text-primary flex items-center">
+                                <HelpCircle className="w-6 h-6 mr-2 text-accent"/>
+                                Your Question:
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <p className="text-lg text-foreground/90">{submittedQuestion}</p>
+                        </CardContent>
+                    </Card>
+                )}
+
 				{scriptureData && scriptureData.scriptureEntries.length > 0 && (
 					<div className="space-y-6">
-						{scriptureData.scriptureEntries.map((entry, index) => (
+						{scriptureData.scriptureEntries.map((entry, index) => {
+                            const ReligionIcon = getReligionIcon(entry.religion);
+                            const religionColor = getReligionColor(entry.religion);
+                            return (
 							<Card
 								key={index}
 								className="shadow-lg animate-fadeIn rounded-xl"
@@ -268,50 +317,47 @@ export default function WisdomWellPage() {
 								<CardHeader className="pb-3">
 									<div className="flex items-start justify-between">
 										<CardTitle className="text-xl text-primary flex items-center">
-											{React.createElement(getReligionIcon(entry.religion), {
-												className: `w-7 h-7 mr-3 ${getReligionColor(
-													entry.religion
-												)} text-white p-1 rounded-full shadow-md`,
-											})}
-											{entry.scripture}
+											<ReligionIcon
+												className={`w-7 h-7 mr-3 ${religionColor} text-white p-1 rounded-full shadow-md`}
+											/>
+                                            {entry.religion} ({entry.scripture})
 										</CardTitle>
 										<Badge
 											variant="secondary"
-											className={`ml-2 ${getReligionColor(
-												entry.religion
-											)} text-white rounded-full px-3 py-1 text-xs shadow-sm`}
+											className={`ml-2 ${religionColor} text-white rounded-full px-3 py-1 text-xs shadow-sm`}
 										>
 											{entry.religion}
 										</Badge>
 									</div>
-									<CardDescription className="text-sm text-muted-foreground pt-1 pl-10">
-										Chapter {entry.chapter}, Verses {entry.verses}
-									</CardDescription>
+                                    <CardDescription className="text-sm text-muted-foreground pt-1 pl-10">
+                                        📖 From: {entry.scripture}, Chapter {entry.chapter}, Verse(s) {entry.verses}
+                                    </CardDescription>
 								</CardHeader>
-								<CardContent className="space-y-4 pt-2">
-									<div className="pl-10">
+								<CardContent className="space-y-4 pt-2 pl-10">
+									<div>
 										<h3 className="font-semibold text-lg mb-1 text-primary flex items-center">
 											<BookOpenText className="w-5 h-5 mr-2 text-accent" />
-											Answer (translated):
+											Quote:
 										</h3>
-										<p className="text-foreground/90 leading-relaxed">
+										<blockquote className="text-foreground/90 leading-relaxed border-l-4 border-accent pl-4 italic">
 											{entry.answer}
-										</p>
+										</blockquote>
 									</div>
 									{entry.aiInsight && (
-										<div className="pl-10">
+										<div>
 											<h3 className="font-semibold text-lg mb-1 text-primary flex items-center">
 												<Sparkles className="w-5 h-5 mr-2 text-accent" />
-												AI's Insight:
+												{`Purpose according to ${entry.scripture}:`}
 											</h3>
-											<p className="text-foreground/80 leading-relaxed italic">
+											<p className="text-foreground/80 leading-relaxed">
 												{entry.aiInsight}
 											</p>
 										</div>
 									)}
 								</CardContent>
 							</Card>
-						))}
+                            );
+                        })}
 					</div>
 				)}
 				{scriptureData && scriptureData.scriptureEntries.length === 0 && !isLoading && (
@@ -321,7 +367,7 @@ export default function WisdomWellPage() {
                         </CardHeader>
                         <CardContent>
                             <p className="text-muted-foreground">
-                                We couldn't find any scriptures matching your query. Please try a different question.
+                                We couldn't find any scriptures matching your query for the selected religions. Please try a different question or broaden your selection.
                             </p>
                         </CardContent>
                     </Card>
@@ -331,3 +377,5 @@ export default function WisdomWellPage() {
 		</div>
 	);
 }
+
+    
