@@ -104,3 +104,34 @@ body {
     }
   }
 }
+
+/* Google Translate Widget Styles */
+.goog-te-gadget-simple {
+  @apply bg-background border-border text-foreground rounded-md p-2 shadow-sm;
+}
+.goog-te-gadget-simple span {
+  @apply text-sm;
+}
+.goog-te-menu-value span {
+  @apply text-foreground;
+}
+.goog-te-gadget-icon {
+  @apply hidden; /* Hide the Google Translate icon if desired */
+}
+body > .skiptranslate {
+  @apply hidden; /* Hide the "Powered by Google Translate" banner */
+}
+body {
+  top: 0px !important; /* Override Google Translate's top positioning */
+}
+.goog-tooltip {
+  display: none !important;
+}
+.goog-tooltip:hover {
+  display: none !important;
+}
+.goog-text-highlight {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}

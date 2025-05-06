@@ -37,17 +37,17 @@ import {
 	BookOpenText,
 	Sparkles,
 	ScrollText,
-	BookHeart, // For Christianity (general symbol)
-	HandHeart, // For Jainism (Ahimsa, compassion)
-	Gem, // For Sikhism (precious teachings/Guru)
-	Palette, // For Hinduism (diversity, richness) - can be generic for art/creation
+	BookHeart, 
+	HandHeart, 
+	Gem, 
+	Palette, 
 	LucideProps,
-	Wheat, // For Buddhism (growth, harvest of wisdom)
-	MoonStar, // For Islam
-	Flower2, // For Buddhism (Lotus alternative)
-	Hand, // For Jainism (alternative/general)
-	Star, // For Judaism (Star of David)
-	Circle as CircleIcon, // For Taoism (YinYang alternative if YinYang not found)
+	Wheat, 
+	MoonStar, 
+	Flower2, 
+	Hand, 
+	Star, 
+	Circle as CircleIcon,
 } from "lucide-react";
 
 const ALL_RELIGIONS = [
@@ -69,10 +69,10 @@ const formSchema = z.object({
 	}),
 	selectedReligions: z
 		.array(z.string())
-		.refine((value) => value.some(item => ALL_RELIGIONS.includes(item as Religion)), { // Ensure selected items are valid religions
+		.refine((value) => value.some(item => ALL_RELIGIONS.includes(item as Religion)), { 
 			message: "You have to select at least one religion.",
 		})
-		.refine((value) => value.length > 0, { // Check if array is not empty
+		.refine((value) => value.length > 0, { 
 			message: "You have to select at least one religion.",
 		}),
 });
@@ -139,12 +139,12 @@ export default function WisdomWellPage() {
 			Hinduism: Palette,
 			Islam: MoonStar,
 			Christianity: BookHeart,
-			Buddhism: Flower2, // Using Flower2 as a stand-in for Lotus
-			Judaism: Star, // Using Star as a stand-in for Menorah/Star of David
-			Jainism: Hand, // Using Hand as a stand-in
+			Buddhism: Flower2,
+			Judaism: Star, 
+			Jainism: Hand, 
 			Sikhism: Gem,
-			Taoism: CircleIcon, // Using CircleIcon as a stand-in for YinYang
-			Default: Wheat, // Default icon
+			Taoism: CircleIcon, 
+			Default: Wheat, 
 		};
 		return religionIcons[religion] || religionIcons["Default"];
 	};
@@ -256,13 +256,16 @@ export default function WisdomWellPage() {
 																<Checkbox
 																	checked={field.value?.includes(religion)}
 																	onCheckedChange={(checked) => {
-																		return checked
-																			? field.onChange([...(field.value || []), religion])
-																			: field.onChange(
-																					(field.value || []).filter(
-																						(value) => value !== religion
-																					)
-																				);
+																		const currentValues = field.value || [];
+																		if (checked) {
+																			field.onChange([...currentValues, religion]);
+																		} else {
+																			field.onChange(
+																				currentValues.filter(
+																					(value) => value !== religion
+																				)
+																			);
+																		}
 																	}}
 																	aria-labelledby={`religion-label-${religion}`}
 																	id={`religion-checkbox-${religion}`}
@@ -410,6 +413,7 @@ export default function WisdomWellPage() {
 				)}
 			</main>
 			<footer className="w-full max-w-3xl mt-16 pt-8 pb-4 border-t border-border/80 text-center">
+				<div id="google_translate_element" className="mb-4"></div>
 				<p className="text-sm text-muted-foreground">
 					WisdomWell &copy; {currentYear ?? ""} - Your guide to multi-faith scriptural insights.
 				</p>
