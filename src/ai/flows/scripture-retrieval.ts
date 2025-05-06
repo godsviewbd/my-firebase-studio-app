@@ -79,7 +79,7 @@ Instructions:
 
 Available Scriptures by Religion (search within these for the selected religions):
 
-{{#if (includes religions "Hinduism")}}
+{{#includes religions "Hinduism"}}
 🕉️ Hinduism:
     Sruti (Apaurusheya):
         Vedas – Rig, Yajur, Sama, Atharva
@@ -95,9 +95,9 @@ Available Scriptures by Religion (search within these for the selected religions
         Agamas (Tantric texts)
         Sutras: Narada Bhakti Sutra, Shandilya Bhakti Sutra
         Upa-Vedas: Ayurveda (medicine), Dhanurveda (archery), Gandharvaveda (music/dance), Shilpaveda (architecture)
-{{/if}}
+{{/includes}}
 
-{{#if (includes religions "Islam")}}
+{{#includes religions "Islam"}}
 ☪️ Islam:
     Primary:
         Qur'an
@@ -109,16 +109,16 @@ Available Scriptures by Religion (search within these for the selected religions
         Sunan an-Nasa'i
         Sunan Ibn Majah
         Muwatta Imam Malik
-{{/if}}
+{{/includes}}
 
-{{#if (includes religions "Christianity")}}
+{{#includes religions "Christianity"}}
 ✝️ Christianity:
     Holy Bible:
         Old Testament (e.g., Genesis, Exodus, Psalms, Proverbs, Isaiah, Ecclesiastes, Micah)
         New Testament (e.g., Gospels - Matthew, Mark, Luke, John; Epistles - Romans, Corinthians, Ephesians; Revelation)
-{{/if}}
+{{/includes}}
 
-{{#if (includes religions "Buddhism")}}
+{{#includes religions "Buddhism"}}
 ☸️ Buddhism:
     Pali Canon (Tipitaka):
         Vinaya Pitaka (monastic discipline)
@@ -131,9 +131,9 @@ Available Scriptures by Religion (search within these for the selected religions
         Lankavatara Sutra
         Pure Land Sutras
     Tibetan Book of the Dead (Bardo Thodol) - Vajrayana
-{{/if}}
+{{/includes}}
 
-{{#if (includes religions "Judaism")}}
+{{#includes religions "Judaism"}}
 🕎 Judaism:
     Tanakh (Hebrew Bible):
         Torah (Pentateuch: Genesis, Exodus, Leviticus, Numbers, Deuteronomy)
@@ -144,18 +144,18 @@ Available Scriptures by Religion (search within these for the selected religions
         Gemara
     Midrash
     Zohar (Kabbalah)
-{{/if}}
+{{/includes}}
 
-{{#if (includes religions "Jainism")}}
+{{#includes religions "Jainism"}}
 🛕 Jainism:
     Agamas (canonical scriptures, divided into Angas, Upangas, Prakirnakas, Chedasutras, Mulasutras)
         Example: Acharanga Sutra, Sutrakritanga Sutra, Kalpa Sutra
     Tattvartha Sutra (major philosophical text accepted by all sects)
     Samayasara (by Acharya Kundakunda)
     Ratnakaranda Sravakacara
-{{/if}}
+{{/includes}}
 
-{{#if (includes religions "Sikhism")}}
+{{#includes religions "Sikhism"}}
 🛐 Sikhism:
     Primary:
         Guru Granth Sahib (referred to by Ang or Page number, and often by Mehl indicating the Guru)
@@ -163,15 +163,15 @@ Available Scriptures by Religion (search within these for the selected religions
         Dasam Granth (writings attributed to Guru Gobind Singh)
         Varan Bhai Gurdas (commentaries by Bhai Gurdas)
         Janamsakhis (biographies of Guru Nanak)
-{{/if}}
+{{/includes}}
 
-{{#if (includes religions "Taoism")}}
+{{#includes religions "Taoism"}}
 ☯️ Taoism:
     Tao Te Ching (Daodejing) - by Laozi
     Zhuangzi (Chuang Tzu)
     Liezi
     Daozang (Taoist Canon - a vast collection of texts)
-{{/if}}
+{{/includes}}
 
 Return an array of scripture entries in the 'scriptureEntries' field of the JSON output. If no relevant scriptures are found for ANY of the selected religions, return an empty array for 'scriptureEntries'.
 `,
