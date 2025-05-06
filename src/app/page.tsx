@@ -40,14 +40,14 @@ import {
 	BookHeart,
 	HandHeart,
 	Gem,
-	YinYang,
 	Palette,
 	LucideProps,
 	Wheat,
-	Menorah, // Added for Judaism
-	MoonStar, // Added for Islam
-	Flower2, // Replaced Lotus for Buddhism
-	Hand, // Added for Jainism
+	MoonStar, 
+	Flower2, 
+	Hand, 
+	Star, 
+    CircleDot, // Replaced YinYang
 } from "lucide-react";
 
 const formSchema = z.object({
@@ -101,14 +101,14 @@ export default function WisdomWellPage() {
 
 	const getReligionIcon = (religion: string): React.FC<LucideProps> => {
 		const religionIcons: Record<string, React.FC<LucideProps>> = {
-			Hinduism: Palette, 
+			Hinduism: Palette,
 			Islam: MoonStar,
 			Christianity: BookHeart,
-			Buddhism: Flower2, // Using Flower2 as a substitute for Lotus
-			Judaism: Menorah,
-			Jainism: Hand, 
-			Sikhism: Wheat, 
-			Taoism: YinYang,
+			Buddhism: Flower2,
+			Judaism: Star,
+			Jainism: Hand,
+			Sikhism: Wheat,
+			Taoism: CircleDot, // Replaced YinYang with CircleDot
 			Default: HandHeart,
 		};
 		// For some reason, Tailwind tree-shaker removes the dynamic classes for icons
@@ -125,11 +125,11 @@ export default function WisdomWellPage() {
 			Christianity: React.createElement(BookHeart, {
 				className: "w-6 h-6 mr-3 bg-sky-500 text-white p-1 rounded-full",
 			}),
-			Buddhism: React.createElement(Flower2, { // Updated to Flower2
-				className: "w-6 h-6 mr-3 bg-pink-500 text-white p-1 rounded-full", 
+			Buddhism: React.createElement(Flower2, { 
+				className: "w-6 h-6 mr-3 bg-pink-500 text-white p-1 rounded-full",
 			}),
-			Judaism: React.createElement(Menorah, {
-				className: "w-6 h-6 mr-3 bg-blue-600 text-white p-1 rounded-full", 
+			Judaism: React.createElement(Star, { 
+				className: "w-6 h-6 mr-3 bg-blue-600 text-white p-1 rounded-full",
 			}),
 			Jainism: React.createElement(Hand, {
 				className: "w-6 h-6 mr-3 bg-yellow-500 text-white p-1 rounded-full",
@@ -137,7 +137,7 @@ export default function WisdomWellPage() {
 			Sikhism: React.createElement(Wheat, {
 				className: "w-6 h-6 mr-3 bg-purple-500 text-white p-1 rounded-full",
 			}),
-			Taoism: React.createElement(YinYang, {
+			Taoism: React.createElement(CircleDot, { // Replaced YinYang with CircleDot
 				className: "w-6 h-6 mr-3 bg-gray-500 text-white p-1 rounded-full",
 			}),
 			Default: React.createElement(HandHeart, {
@@ -158,7 +158,7 @@ export default function WisdomWellPage() {
 			}),
 			AlertCircle: React.createElement(AlertCircle, { className: "h-4 w-4" }),
 			Gem: React.createElement(Gem, {
-				className: "w-6 h-6 mr-3 bg-teal-500 text-white p-1 rounded-full", 
+				className: "w-6 h-6 mr-3 bg-teal-500 text-white p-1 rounded-full",
 			}),
 		};
 		return religionIcons[religion] || religionIcons["Default"];
@@ -168,8 +168,8 @@ export default function WisdomWellPage() {
 		Hinduism: "bg-orange-500",
 		Islam: "bg-emerald-500",
 		Christianity: "bg-sky-500",
-		Buddhism: "bg-pink-500", 
-		Judaism: "bg-blue-600", 
+		Buddhism: "bg-pink-500",
+		Judaism: "bg-blue-600",
 		Jainism: "bg-yellow-500",
 		Sikhism: "bg-purple-500",
 		Taoism: "bg-gray-500",
