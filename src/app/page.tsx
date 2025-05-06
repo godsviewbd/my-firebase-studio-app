@@ -171,20 +171,6 @@ export default function WisdomWellPage() {
 		return religionBadgeStyles[religion] || religionBadgeStyles["Default"];
 	};
 
-	// Local state to manage selected religions for the UI
-	const [selectedReligions, setSelectedReligions] = React.useState<string[]>([]);
-
-	// Handler to update selected religions
-	const handleReligionChange = (religion: string) => {
-		setSelectedReligions((prev) => {
-			if (prev.includes(religion)) {
-				return prev.filter((r) => r !== religion);
-			} else {
-				return [...prev, religion];
-			}
-		});
-	};
-
 	return (
 		<div className="min-h-screen bg-background text-foreground flex flex-col items-center p-4 md:p-8 selection:bg-accent/30 selection:text-accent-foreground">
 			<header className="w-full max-w-3xl mb-8 md:mb-12 text-center">
@@ -254,15 +240,6 @@ export default function WisdomWellPage() {
 														<FormItem
 															key={religion}
 															className="flex flex-row items-center space-x-2 p-2.5 rounded-md hover:bg-muted/50 transition-colors cursor-pointer border border-input hover:border-primary/50 data-[state=checked]:border-primary"
-															onClick={() => {
-																// Update the form's selectedReligions field directly
-																const newValue = field.value.includes(religion)
-																	? field.value.filter((r: string) => r !== religion)
-																	: [...field.value, religion];
-																field.onChange(newValue);
-																handleReligionChange(religion);
-															}}
-															data-state={field.value.includes(religion) ? 'checked' : 'unchecked'}
 														>
 															<FormControl>
 																<Checkbox
@@ -273,8 +250,7 @@ export default function WisdomWellPage() {
 																		const newValue = checked
 																			? [...field.value, religion]
 																			: field.value.filter((r: string) => r !== religion);
-																		field.onChange(newValue);
-																		handleReligionChange(religion);
+																		form.setValue("selectedReligions", newValue);
 																	}}
 																/>
 															</FormControl>
@@ -430,3 +406,5 @@ export default function WisdomWellPage() {
 		</div>
 	);
 }
+
+    
